@@ -1,0 +1,12 @@
+.mainHeader {
+    background-color: #fff;
+    border-bottom: 1px solid #e6e6e6;
+    padding: 0 20px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}

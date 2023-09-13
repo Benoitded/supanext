@@ -1,0 +1,22 @@
+.mainOrder {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.addOrder {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    margin-bottom: 20px;
+}
+
+.itemOrders {
+    display: flex;
+    align-items: center;
+}
+
+.itemOrders>* {
+    width: 100px;
+}
