@@ -20,9 +20,6 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 import { avalanche, bsc, mainnet } from "wagmi/chains";
-
-import { EthereumProvider } from "@walletconnect/ethereum-provider";
-import { BrowserProvider } from "ethers";
 import { SiweMessage } from "siwe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -31,15 +28,20 @@ import Moralis from "moralis";
 const STATEMENT = "Please sign this message to confirm your identity.";
 const EXPIRATION_TIME = 900000;
 const TIMEOUT = 15;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-const _supabaseAnon = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const _supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
 
 Moralis.start({
   apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
 });
+
+export interface VerifyMessage {
+  network: "evm";
+  signature: string;
+  message: string;
+}
 
 export async function verifyMessage({
   network,
@@ -71,16 +73,16 @@ export async function verifyMessage({
       .single();
     user = response.data;
   }
-
-  const token = jwt.sign(
-    {
-      ...user,
-      aud: "authenticated",
-      role: "authenticated",
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
-    },
-    config.SUPABASE_JWT
-  );
+  const token = 0;
+  // const token = jwt.sign(
+  //   {
+  //     ...user,
+  //     aud: "authenticated",
+  //     role: "authenticated",
+  //     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+  //   },
+  //   process.env.SUPABASE_JWT
+  //);
 
   return { user, token };
 }
@@ -124,7 +126,7 @@ export default function Login() {
     const message = new SiweMessage({
       domain: window.location.host,
       address,
-      chainId: "1",
+      chainId: 1,
       statement: "Sign in to ClariFi.",
       uri: window.location.origin,
       version: "1",
@@ -136,9 +138,9 @@ export default function Login() {
 
     console.log(signature);
     console.log(message);
-    const { user } = await verifyMessage({ message, signature });
+    // const { user } = await verifyMessage({ message, signature });
 
-    console.log(user);
+    // console.log(user);
   }
 
   return (

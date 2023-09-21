@@ -10,6 +10,11 @@ import supabase from "@/supabase";
 export default function Header() {
   const [user, setUser] = useState();
 
+  async function getAuth() {
+    const { data } = await supabase.auth.getUser();
+    console.log(supabase);
+    console.log(data);
+  }
   supabase.auth.onAuthStateChange((event, session) => {
     // console.log(session);
     if (session && session.user) {
@@ -26,6 +31,7 @@ export default function Header() {
 
   useEffect(() => {
     console.log(user);
+    getAuth();
   }, [user]);
   return (
     <div className={styles.mainHeader}>
@@ -33,7 +39,7 @@ export default function Header() {
       <Link href="/login">Go to login</Link>
       <Link href="/orders">Go to orders</Link>
       <Link href="/wallets">Wallets</Link>
-      <Link href="/walletsMor">WalletsMor</Link>
+      <Link href="/walletsMorS">WalletsMorS</Link>
       <Web3Button />
       <div
         onClick={handleSignOut}

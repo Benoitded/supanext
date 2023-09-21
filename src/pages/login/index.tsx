@@ -1,11 +1,13 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import supabase from "@/supabase";
-import { log } from "console";
 import { useState } from "react";
 
 export default function Login() {
-  const [statusConnect, setStatusConnect] = useState();
+  const [statusConnect, setStatusConnect] = useState<boolean | undefined>(
+    undefined
+  );
+
   const handleSignUp = async () => {
     console.log("Sign in");
     let { data, error } = await supabase.auth.signUp({
@@ -31,18 +33,30 @@ export default function Login() {
 
   const handleSignInInput = async () => {
     console.log("Sign in input");
-    let mail = document.querySelector("#mail").value;
-    let password = document.querySelector("#password").value;
-    console.log(mail);
-    console.log(password);
-    let { data, error } = await supabase.auth.signUp({
-      email: mail,
-      password: password,
-    });
-    console.log(data);
-    console.log(error);
 
-    // Traiter les résultats de l'appel signInWithPassword ici
+    const mailElement = document.querySelector("#mail") as HTMLInputElement;
+    const passwordElement = document.querySelector(
+      "#password"
+    ) as HTMLInputElement;
+
+    if (mailElement && passwordElement) {
+      const mail = mailElement.textContent ?? ""; // Utilise une chaîne vide si mailElement.textContent est null
+      const password = passwordElement.textContent ?? ""; // Utilise une chaîne vide si passwordElement.textContent est null
+      console.log(mail);
+      console.log(password);
+
+      let { data, error } = await supabase.auth.signUp({
+        email: mail,
+        password: password,
+      });
+
+      console.log(data);
+      console.log(error);
+
+      // Traiter les résultats de l'appel signUp ici
+    } else {
+      console.error("Les éléments mail et/ou password n'ont pas été trouvés.");
+    }
   };
 
   const handleLogIn = async () => {
