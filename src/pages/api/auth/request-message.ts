@@ -8,7 +8,12 @@ export default async function handler(
   try {
     console.log("gooo");
     const { address, chain, networkType } = req.body;
-    const message = await requestMessage({ address, chain, networkType });
+
+    const message = await requestMessage({
+      address,
+      chain,
+      networkType,
+    });
 
     res.status(200).json({ message });
   } catch (err: any) {

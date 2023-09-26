@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import Layout from "../components/layout";
 import Header from "@/components/header";
 import { AppProps } from "next/app";
@@ -24,9 +25,12 @@ const wagmiConfig = createConfig({
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  // Moralis.start({
-  //   apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
-  // });
+  useEffect(() => {
+    Moralis.start({
+      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+    });
+  }, []); // Notez les crochets vides pour garantir un seul appel
+
   return (
     <>
       <WagmiConfig config={wagmiConfig}>

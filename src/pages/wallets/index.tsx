@@ -33,9 +33,9 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
 const _supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
 
-Moralis.start({
-  apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
-});
+// Moralis.start({
+//   apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+// });
 
 export interface VerifyMessage {
   network: "evm";

@@ -69,6 +69,7 @@ export async function verifyMessage({
     signature,
     message,
   });
+  console.log(result);
 
   const authData = result.toJSON();
   console.log(authData);

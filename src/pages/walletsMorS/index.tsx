@@ -4,9 +4,13 @@ import React, { useState, useEffect } from "react"; // Ensure you've imported us
 import axios from "axios";
 import { ethers } from "ethers";
 import { createClient } from "@supabase/supabase-js";
+import { useSignMessage, useAccount } from "wagmi";
+// import Moralis from "moralis";
 import supabase from "@/services/authService";
-import { Web3Button } from "@web3modal/react";
-
+// import { Web3Button } from "@web3modal/react";
+// Moralis.start({
+//   apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+// });
 // const SUPABASE_URL = "https://qboizbrjtkumfrvstono.supabase.co";
 // const SUPABASE_PUBLIC_ANON_KEY = "..."; // Votre clé publique Supabase ici
 
@@ -19,6 +23,15 @@ const WalletMorS: React.FC = () => {
   const [user, setUser] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [listOrders, setListOrders] = useState<any[]>([]);
+  const [storedMessage, setStoredMessage] = useState<string | null>(null); // Ajout de cet état pour stocker `message`
+  const {
+    data,
+    error: errorM,
+    isLoading: isLoadingM,
+    signMessage,
+    variables,
+  } = useSignMessage();
+  const { address, connector, isConnected } = useAccount();
 
   // const [supabase, setSupabase] = useState<any>(null);
 
@@ -34,6 +47,38 @@ const WalletMorS: React.FC = () => {
     const signer = provider.getSigner();
     return { signer, chain: chainId, account: accounts[0] };
   };
+
+  // const handleAuth = async () => {
+  //   try {
+  //     const responseMessage = await axios.post("/api/auth/request-message", {
+  //       address: address,
+  //       chain: 1,
+  //       networkType: "evm",
+  //     });
+  //     const { message } = responseMessage.data;
+  //     setStoredMessage(message); // Stocke le message dans l'état
+  //     signMessage({ message });
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (data && storedMessage) { // Vérifie que `storedMessage` est aussi défini
+  //     const executeWhenDataAvailable = async () => {
+  //       const responseVerify = await axios.post("/api/auth/sign-message", {
+  //         message: storedMessage, // Utilise storedMessage ici
+  //         data,
+  //         networkType: "evm",
+  //       });
+  //       const userData = responseVerify.data;
+
+  //       // ... (autre code)
+  //     };
+
+  //     executeWhenDataAvailable();
+  //   }
+  // }, [data, storedMessage]); // Ajoute storedMessage dans la liste des dépendances
 
   const handleAuth = async () => {
     try {
@@ -83,12 +128,22 @@ const WalletMorS: React.FC = () => {
       setError(err.message);
     }
   };
+
   useEffect(() => {
     if (user) {
       // Check if the user is set.
       loadOrders();
     }
   }, [user]); // Dependency array to run this effect whenever `user` changes.
+
+  useEffect(() => {
+    console.log("look at orders");
+    console.log(user);
+    if (user) {
+      // Check if the user is set.
+      loadOrders();
+    }
+  }, []);
 
   const getUser = async () => {
     try {
@@ -138,7 +193,7 @@ const WalletMorS: React.FC = () => {
       }
       console.log(user);
       if (!user?.user?.user?.id) {
-        console.log("c'est MORT");
+        console.log("c'est MORT, on charge pas les orders");
         throw new Error("User UUID not found.");
       }
 
@@ -183,7 +238,7 @@ const WalletMorS: React.FC = () => {
   return (
     <div>
       <h1>Demo Auth Supabase</h1>
-      <Web3Button />
+      {/* <Web3Button /> */}
       <button onClick={handleAuth}>Authenticate via Metamask</button>
       <button onClick={getUser}>Get User</button>
       <button onClick={addLine}>Add Line</button>
