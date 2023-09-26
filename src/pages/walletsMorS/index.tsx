@@ -122,7 +122,12 @@ const WalletMorS: React.FC = () => {
           },
         }
       );
-
+      localStorage.setItem(
+        "sb-jwt-" +
+          SUPABASE_URL.split(".")[0].replace("https://", "") +
+          "auth-token",
+        JSON.stringify(userData)
+      );
       setUser(userData);
     } catch (err: any) {
       setError(err.message);
@@ -137,13 +142,34 @@ const WalletMorS: React.FC = () => {
   }, [user]); // Dependency array to run this effect whenever `user` changes.
 
   useEffect(() => {
-    console.log("look at orders");
-    console.log(user);
-    if (user) {
-      // Check if the user is set.
-      loadOrders();
-    }
+    console.log("first");
+    const userData = JSON.parse(
+      localStorage.getItem(
+        "sb-jwt-" +
+          SUPABASE_URL.split(".")[0].replace("https://", "") +
+          "auth-token"
+      ) || "{}"
+    );
+    console.log(userData);
+    _supabaseAuthenticated = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLIC_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${userData.user.token}`,
+          },
+        },
+      }
+    );
+    setUser(userData);
+    console.log(_supabaseAuthenticated);
+    // loadOrders();
   }, []);
+
+  useEffect(() => {
+    console.log(listOrders);
+  }, [listOrders]);
 
   const getUser = async () => {
     try {
@@ -192,6 +218,7 @@ const WalletMorS: React.FC = () => {
         throw new Error("You need to authenticate with Metamask first.");
       }
       console.log(user);
+      console.log(user?.user?.user?.id);
       if (!user?.user?.user?.id) {
         console.log("c'est MORT, on charge pas les orders");
         throw new Error("User UUID not found.");

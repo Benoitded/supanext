@@ -12,8 +12,8 @@ export default function Header() {
 
   async function getAuth() {
     const { data } = await supabase.auth.getUser();
-    console.log(supabase);
-    console.log(data);
+    // console.log(supabase);
+    // console.log(data);
   }
   supabase.auth.onAuthStateChange((event, session) => {
     // console.log(session);
