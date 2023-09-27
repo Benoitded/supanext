@@ -35,104 +35,127 @@ const WalletMorS: React.FC = () => {
 
   // const [supabase, setSupabase] = useState<any>(null);
 
-  const connectToMetamask = async () => {
-    const provider = new ethers.providers.Web3Provider(
-      window.ethereum as any,
-      "any"
-    );
-    const [accounts, chainId] = await Promise.all([
-      provider.send("eth_requestAccounts", []),
-      provider.send("eth_chainId", []),
-    ]);
-    const signer = provider.getSigner();
-    return { signer, chain: chainId, account: accounts[0] };
-  };
-
-  // const handleAuth = async () => {
-  //   try {
-  //     const responseMessage = await axios.post("/api/auth/request-message", {
-  //       address: address,
-  //       chain: 1,
-  //       networkType: "evm",
-  //     });
-  //     const { message } = responseMessage.data;
-  //     setStoredMessage(message); // Stocke le message dans l'état
-  //     signMessage({ message });
-  //   } catch (err: any) {
-  //     setError(err.message);
-  //   }
+  // const connectToMetamask = async () => {
+  //   const provider = new ethers.providers.Web3Provider(
+  //     window.ethereum as any,
+  //     "any"
+  //   );
+  //   const [accounts, chainId] = await Promise.all([
+  //     provider.send("eth_requestAccounts", []),
+  //     provider.send("eth_chainId", []),
+  //   ]);
+  //   const signer = provider.getSigner();
+  //   return { signer, chain: chainId, account: accounts[0] };
   // };
-
-  // useEffect(() => {
-  //   if (data && storedMessage) { // Vérifie que `storedMessage` est aussi défini
-  //     const executeWhenDataAvailable = async () => {
-  //       const responseVerify = await axios.post("/api/auth/sign-message", {
-  //         message: storedMessage, // Utilise storedMessage ici
-  //         data,
-  //         networkType: "evm",
-  //       });
-  //       const userData = responseVerify.data;
-
-  //       // ... (autre code)
-  //     };
-
-  //     executeWhenDataAvailable();
-  //   }
-  // }, [data, storedMessage]); // Ajoute storedMessage dans la liste des dépendances
 
   const handleAuth = async () => {
     try {
-      const { signer, chain, account } = await connectToMetamask();
-
-      if (!account) {
-        throw new Error("No account found");
-      }
-      if (!chain) {
-        throw new Error("No chain found");
-      }
-
       const responseMessage = await axios.post("/api/auth/request-message", {
-        address: account,
+        address: address,
         chain: 1,
         networkType: "evm",
       });
-      // console.log(responseMessage);
       const { message } = responseMessage.data;
-
-      const signature = await signer.signMessage(message);
-
-      const responseVerify = await axios.post("/api/auth/sign-message", {
-        message,
-        signature,
-        networkType: "evm",
-      });
-      const userData = responseVerify.data;
-      console.log("userData");
-      console.log(userData);
-
-      // Set the Supabase client with authorization headers
-      _supabaseAuthenticated = createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLIC_ANON_KEY,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${userData.user.token}`,
-            },
-          },
-        }
-      );
-      localStorage.setItem(
-        "sb-jwt-" +
-          SUPABASE_URL.split(".")[0].replace("https://", "") +
-          "auth-token",
-        JSON.stringify(userData)
-      );
-      setUser(userData);
+      setStoredMessage(message); // Stocke le message dans l'état
+      signMessage({ message });
     } catch (err: any) {
       setError(err.message);
     }
   };
+
+  useEffect(() => {
+    if (data && storedMessage) {
+      // Vérifie que `storedMessage` est aussi défini
+      console.log(data);
+      const executeWhenDataAvailable = async () => {
+        const responseVerify = await axios.post("/api/auth/sign-message", {
+          message: storedMessage, // Utilise storedMessage ici
+          signature: data,
+          networkType: "evm",
+        });
+        const userData = responseVerify.data;
+        console.log("userData");
+        console.log(userData);
+
+        // Set the Supabase client with authorization headers
+        _supabaseAuthenticated = createClient(
+          SUPABASE_URL,
+          SUPABASE_PUBLIC_ANON_KEY,
+          {
+            global: {
+              headers: {
+                Authorization: `Bearer ${userData.user.token}`,
+              },
+            },
+          }
+        );
+        localStorage.setItem(
+          "sb-jwt-" +
+            SUPABASE_URL.split(".")[0].replace("https://", "") +
+            "auth-token",
+          JSON.stringify(userData)
+        );
+        setUser(userData);
+      };
+
+      executeWhenDataAvailable();
+    }
+  }, [data, storedMessage]); // Ajoute storedMessage dans la liste des dépendances
+
+  // const handleAuth = async () => {
+  //   try {
+  //     const { signer, chain, account } = await connectToMetamask();
+
+  //     if (!account) {
+  //       throw new Error("No account found");
+  //     }
+  //     if (!chain) {
+  //       throw new Error("No chain found");
+  //     }
+
+  //     const responseMessage = await axios.post("/api/auth/request-message", {
+  //       address: account,
+  //       chain: 1,
+  //       networkType: "evm",
+  //     });
+  //     // console.log(responseMessage);
+  //     const { message } = responseMessage.data;
+
+  //     const signature = await signer.signMessage(message);
+  //     console.log(signature);
+
+  //     const responseVerify = await axios.post("/api/auth/sign-message", {
+  //       message,
+  //       signature,
+  //       networkType: "evm",
+  //     });
+  //     const userData = responseVerify.data;
+  //     console.log("userData");
+  //     console.log(userData);
+
+  //     // Set the Supabase client with authorization headers
+  //     _supabaseAuthenticated = createClient(
+  //       SUPABASE_URL,
+  //       SUPABASE_PUBLIC_ANON_KEY,
+  //       {
+  //         global: {
+  //           headers: {
+  //             Authorization: `Bearer ${userData.user.token}`,
+  //           },
+  //         },
+  //       }
+  //     );
+  //     localStorage.setItem(
+  //       "sb-jwt-" +
+  //         SUPABASE_URL.split(".")[0].replace("https://", "") +
+  //         "auth-token",
+  //       JSON.stringify(userData)
+  //     );
+  //     setUser(userData);
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   }
+  // };
 
   useEffect(() => {
     if (user) {
