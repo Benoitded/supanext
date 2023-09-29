@@ -5,19 +5,21 @@ import axios from "axios";
 import { ethers } from "ethers";
 import { createClient } from "@supabase/supabase-js";
 import { useSignMessage, useAccount } from "wagmi";
-// import Moralis from "moralis";
 import supabase from "@/services/authService";
-// import { Web3Button } from "@web3modal/react";
+import { Web3Button } from "@web3modal/react";
+
+// import Moralis from "moralis";
 // Moralis.start({
 //   apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
 // });
-// const SUPABASE_URL = "https://qboizbrjtkumfrvstono.supabase.co";
-// const SUPABASE_PUBLIC_ANON_KEY = "..."; // Votre clé publique Supabase ici
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const SUPABASE_PUBLIC_ANON_KEY = process.env
   .NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 let _supabaseAuthenticated: any;
+
+const LOCAL_STORAGE_KEY =
+  "sb-jwt-" + SUPABASE_URL.split(".")[0].replace("https://", "") + "auth-token";
 
 const WalletMorS: React.FC = () => {
   const [user, setUser] = useState<any | null>(null);
@@ -102,97 +104,70 @@ const WalletMorS: React.FC = () => {
     }
   }, [data, storedMessage]); // Ajoute storedMessage dans la liste des dépendances
 
-  // const handleAuth = async () => {
-  //   try {
-  //     const { signer, chain, account } = await connectToMetamask();
-
-  //     if (!account) {
-  //       throw new Error("No account found");
-  //     }
-  //     if (!chain) {
-  //       throw new Error("No chain found");
-  //     }
-
-  //     const responseMessage = await axios.post("/api/auth/request-message", {
-  //       address: account,
-  //       chain: 1,
-  //       networkType: "evm",
-  //     });
-  //     // console.log(responseMessage);
-  //     const { message } = responseMessage.data;
-
-  //     const signature = await signer.signMessage(message);
-  //     console.log(signature);
-
-  //     const responseVerify = await axios.post("/api/auth/sign-message", {
-  //       message,
-  //       signature,
-  //       networkType: "evm",
-  //     });
-  //     const userData = responseVerify.data;
-  //     console.log("userData");
-  //     console.log(userData);
-
-  //     // Set the Supabase client with authorization headers
-  //     _supabaseAuthenticated = createClient(
-  //       SUPABASE_URL,
-  //       SUPABASE_PUBLIC_ANON_KEY,
-  //       {
-  //         global: {
-  //           headers: {
-  //             Authorization: `Bearer ${userData.user.token}`,
-  //           },
-  //         },
-  //       }
-  //     );
-  //     localStorage.setItem(
-  //       "sb-jwt-" +
-  //         SUPABASE_URL.split(".")[0].replace("https://", "") +
-  //         "auth-token",
-  //       JSON.stringify(userData)
-  //     );
-  //     setUser(userData);
-  //   } catch (err: any) {
-  //     setError(err.message);
-  //   }
-  // };
+  const handleDisc = async () => {
+    console.log("disconnect");
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    setUser(null);
+  };
 
   useEffect(() => {
     if (user) {
       // Check if the user is set.
       loadOrders();
+    } else {
+      setListOrders([]);
     }
   }, [user]); // Dependency array to run this effect whenever `user` changes.
 
   useEffect(() => {
     console.log("first");
-    const userData = JSON.parse(
-      localStorage.getItem(
-        "sb-jwt-" +
-          SUPABASE_URL.split(".")[0].replace("https://", "") +
-          "auth-token"
-      ) || "{}"
-    );
+    const storedItem = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+    if (!storedItem) {
+      console.log("Item not found in localStorage");
+      return;
+    }
+
+    const userData = JSON.parse(storedItem);
     console.log(userData);
-    _supabaseAuthenticated = createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLIC_ANON_KEY,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${userData.user.token}`,
+    if (userData != null) {
+      console.log("pas nul");
+      _supabaseAuthenticated = createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLIC_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${userData.user.token}`,
+            },
           },
-        },
-      }
-    );
-    setUser(userData);
-    console.log(_supabaseAuthenticated);
-    // loadOrders();
+        }
+      );
+      setUser(userData);
+      console.log(_supabaseAuthenticated);
+    }
   }, []);
 
+  // useEffect(() => {
+  //   console.log(listOrders);
+  // }, [listOrders]);
   useEffect(() => {
-    console.log(listOrders);
-  }, [listOrders]);
+    console.log(address);
+    const storedItem = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!storedItem) {
+      console.log("Item not found in localStorage");
+      return;
+    }
+    const userData = JSON.parse(storedItem);
+    let addressLocal = userData.user.user.metadata.address;
+    if (addressLocal == address) {
+      console.log("same address");
+      setUser(userData);
+    } else {
+      console.log("different address");
+      setUser(null);
+    }
+  }, [address]);
 
   const getUser = async () => {
     try {
@@ -224,6 +199,28 @@ const WalletMorS: React.FC = () => {
       const { data, error } = await _supabaseAuthenticated
         .from("orders2")
         .insert([{ command: "Bienvenue", quantity: 34 }]);
+      if (error) {
+        console.error("Supabase error:", error); // Log the Supabase error for more details
+        throw error;
+      }
+      loadOrders();
+    } catch (err: any) {
+      console.log(err.message);
+      setError(err.message || "An error occurred.");
+    }
+  };
+
+  const deleteLine = async (index: number) => {
+    try {
+      console.log("delete" + index);
+      const { error } = await _supabaseAuthenticated
+        .from("orders2")
+        .delete()
+        .eq("id", index);
+
+      // const { data, error } = await _supabaseAuthenticated
+      //   .from("orders2")
+      //   .insert([{ command: "Bienvenue", quantity: 34 }]);
       if (error) {
         console.error("Supabase error:", error); // Log the Supabase error for more details
         throw error;
@@ -288,8 +285,12 @@ const WalletMorS: React.FC = () => {
   return (
     <div>
       <h1>Demo Auth Supabase</h1>
-      {/* <Web3Button /> */}
-      <button onClick={handleAuth}>Authenticate via Metamask</button>
+      {address ? (
+        <button onClick={handleAuth}>Authenticate via Metamask</button>
+      ) : (
+        <Web3Button />
+      )}
+      <button onClick={handleDisc}>Disconnect</button>
       <button onClick={getUser}>Get User</button>
       <button onClick={addLine}>Add Line</button>
       {listOrders &&
@@ -302,6 +303,13 @@ const WalletMorS: React.FC = () => {
               onBlur={(event) => handleUpdateCommand(e.id, event.target.value)}
             />
             <div>{e.quantity}</div>
+            <div
+              style={{ cursor: "pointer" }}
+              onClick={() => deleteLine(e.id)}
+              title="Delete the line"
+            >
+              x
+            </div>
           </div>
         ))}
 

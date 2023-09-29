@@ -26,6 +26,7 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
+    console.log("start moralis once");
     Moralis.start({
       apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
     });
