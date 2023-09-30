@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { requestMessage } from "../../../services/authService";
+import Moralis from "moralis";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,6 +8,10 @@ export default async function handler(
 ) {
   try {
     console.log("gooo");
+    let MORALIS_API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
+    Moralis.start({
+      apiKey: MORALIS_API_KEY,
+    });
     const { address, chain, networkType } = req.body;
 
     const message = await requestMessage({

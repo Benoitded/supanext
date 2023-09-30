@@ -26,6 +26,7 @@ const WalletMorS: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [listOrders, setListOrders] = useState<any[]>([]);
   const [storedMessage, setStoredMessage] = useState<string | null>(null); // Ajout de cet état pour stocker `message`
+  const [isClient, setIsClient] = useState(false);
   const {
     data,
     error: errorM,
@@ -172,7 +173,7 @@ const WalletMorS: React.FC = () => {
   const getUser = async () => {
     try {
       if (!_supabaseAuthenticated) {
-        throw new Error("You need to authenticate with Metamask first.");
+        throw new Error("You need to authenticate first.");
       }
 
       console.log("_supabaseAuthenticated");
@@ -235,7 +236,7 @@ const WalletMorS: React.FC = () => {
   const loadOrders = async () => {
     try {
       if (!_supabaseAuthenticated) {
-        throw new Error("You need to authenticate with Metamask first.");
+        throw new Error("You need to authenticate first.");
       }
       console.log(user);
       console.log(user?.user?.user?.id);
@@ -281,18 +282,27 @@ const WalletMorS: React.FC = () => {
       setError(err.message || "An error occurred.");
     }
   };
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
       <h1>Demo Auth Supabase</h1>
-      {address ? (
-        <button onClick={handleAuth}>Authenticate via Metamask</button>
-      ) : (
-        <Web3Button />
-      )}
-      <button onClick={handleDisc}>Disconnect</button>
-      <button onClick={getUser}>Get User</button>
-      <button onClick={addLine}>Add Line</button>
+      <div>
+        {isClient &&
+          (!address ? (
+            <Web3Button />
+          ) : !user ? (
+            <button onClick={handleAuth}>Authenticate</button>
+          ) : (
+            <button onClick={handleDisc}>Disconnect</button>
+          ))}
+      </div>
+      <div>
+        <button onClick={getUser}>Get User</button>
+        <button onClick={addLine}>Add Line</button>
+      </div>
       {listOrders &&
         listOrders.map((e, index) => (
           <div key={e.id} style={{ display: "flex", gap: "5px" }}>

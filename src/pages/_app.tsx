@@ -23,14 +23,15 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
+// let MORALIS_API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  useEffect(() => {
-    console.log("start moralis once");
-    Moralis.start({
-      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
-    });
-  }, []); // Notez les crochets vides pour garantir un seul appel
+  // useEffect(() => {
+  console.log("start moralis once");
+  // Moralis.start({
+  //   apiKey: MORALIS_API_KEY,
+  // });
+  // }, []);
 
   return (
     <>
