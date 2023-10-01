@@ -9,9 +9,11 @@ export default async function handler(
   try {
     console.log("sign message");
     let MORALIS_API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
-    Moralis.start({
-      apiKey: MORALIS_API_KEY,
-    });
+    if (!Moralis.Core.isStarted) {
+      await Moralis.start({
+        apiKey: MORALIS_API_KEY,
+      });
+    }
 
     const { networkType, message, signature } = req.body;
     const user = await verifyMessage({
@@ -19,9 +21,6 @@ export default async function handler(
       message,
       signature,
     });
-    console.log("both");
-    console.log(user);
-    // console.log(token);
 
     // res.cookie("jwt", token, { httpOnly: true });
     res.status(200).json({ user });

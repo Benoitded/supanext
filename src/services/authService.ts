@@ -62,17 +62,13 @@ export async function verifyMessage({
   signature,
   message,
 }: VerifyMessage) {
-  console.log("deep div verif");
-
   const result = await Moralis.Auth.verify({
     networkType,
     signature,
     message,
   });
-  console.log(result);
 
   const authData = result.toJSON();
-  console.log(authData);
 
   let { data: user } = await supabase
     .from("users")
@@ -80,20 +76,14 @@ export async function verifyMessage({
     .eq("moralis_provider_id", authData.profileId)
     .single();
 
-  console.log("user");
-  console.log(user);
-
   if (!user) {
     const response = await supabase
       .from("users")
       .insert({ moralis_provider_id: authData.profileId, metadata: authData })
       .single();
     user = response.data;
-    console.log("pas user");
-    console.log(user);
   }
-  console.log("sub claim");
-  console.log(user.id);
+
   const token = jwt.sign(
     {
       ...user,

@@ -69,7 +69,6 @@ const WalletMorS: React.FC = () => {
   useEffect(() => {
     if (data && storedMessage) {
       // Vérifie que `storedMessage` est aussi défini
-      console.log(data);
       const executeWhenDataAvailable = async () => {
         const responseVerify = await axios.post("/api/auth/sign-message", {
           message: storedMessage, // Utilise storedMessage ici
@@ -77,8 +76,6 @@ const WalletMorS: React.FC = () => {
           networkType: "evm",
         });
         const userData = responseVerify.data;
-        console.log("userData");
-        console.log(userData);
 
         // Set the Supabase client with authorization headers
         _supabaseAuthenticated = createClient(
@@ -121,7 +118,6 @@ const WalletMorS: React.FC = () => {
   }, [user]); // Dependency array to run this effect whenever `user` changes.
 
   useEffect(() => {
-    console.log("first");
     const storedItem = localStorage.getItem(LOCAL_STORAGE_KEY);
 
     if (!storedItem) {
@@ -299,10 +295,12 @@ const WalletMorS: React.FC = () => {
             <button onClick={handleDisc}>Disconnect</button>
           ))}
       </div>
-      <div>
-        <button onClick={getUser}>Get User</button>
-        <button onClick={addLine}>Add Line</button>
-      </div>
+      {user && (
+        <div>
+          <button onClick={getUser}>Get User</button>
+          <button onClick={addLine}>Add Line</button>
+        </div>
+      )}
       {listOrders &&
         listOrders.map((e, index) => (
           <div key={e.id} style={{ display: "flex", gap: "5px" }}>
